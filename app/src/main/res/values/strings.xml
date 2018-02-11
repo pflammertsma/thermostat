@@ -1,3 +1,9 @@
 <resources>
+
     <string name="app_name">Thermostat</string>
+
+    <string name="state_initializing">INIT</string>
+    <string name="state_error">ERROR</string>
+    <string name="state_temp">%.2f° C</string>
+
 </resources>
