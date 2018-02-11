@@ -12,10 +12,8 @@ import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
-
 public class Bmp180 implements AutoCloseable {
     private static final String TAG = Bmp180.class.getSimpleName();
-
 
     public final static int BMP180_ADDRESS = 0x77;
 
@@ -30,7 +28,6 @@ public class Bmp180 implements AutoCloseable {
     public final static int BMP180_STANDARD = 1;
     public final static int BMP180_HIGH_RES = 2;
     public final static int BMP180_ULTRA_HIGH_RES = 3;
-
 
     private static final int modeDelay[] = {5, 8, 14, 26};
 
@@ -73,7 +70,6 @@ public class Bmp180 implements AutoCloseable {
     private int MC = 0;
     private int MD = 0;
 
-
     private I2cDevice mDevice;
 
     private int mode = BMP180_STANDARD;
@@ -82,7 +78,6 @@ public class Bmp180 implements AutoCloseable {
     private LastRead lastRawPressure = new LastRead();
     private LastRead lastPressure = new LastRead();
     private LastRead lastTemperature = new LastRead();
-
 
     private int standardSeaLevelPressure = 101325;
 
@@ -108,7 +103,6 @@ public class Bmp180 implements AutoCloseable {
         }
     }
 
-
     public synchronized void setMode(@Mode int mode) {
         this.mode = mode;
     }
@@ -133,7 +127,6 @@ public class Bmp180 implements AutoCloseable {
         B2 = readS16(BMP180_CAL_B2);
         MC = readS16(BMP180_CAL_MC);
         MD = readS16(BMP180_CAL_MD);
-
     }
 
     /**
@@ -144,8 +137,9 @@ public class Bmp180 implements AutoCloseable {
      */
     private int readRawTemp() throws IOException {
 
-        if (lastRawTemp.isValid())
+        if (lastRawTemp.isValid()) {
             return lastRawTemp.val;
+        }
 
         mDevice.writeRegByte(BMP180_CONTROL, (byte) BMP180_READ_TEMPERATURE_CMD);
         waitFor(5);
@@ -163,8 +157,9 @@ public class Bmp180 implements AutoCloseable {
      */
     private int readRawPressure() throws IOException {
 
-        if (lastRawPressure.isValid())
+        if (lastRawPressure.isValid()) {
             return lastRawPressure.val;
+        }
 
         mDevice.writeRegByte(BMP180_CONTROL, (byte) (BMP180_READ_PRESSURE_CMD + (mode << 6)));
         waitFor(modeDelay[mode]);
@@ -184,8 +179,9 @@ public class Bmp180 implements AutoCloseable {
      * @throws IOException if there was communication problem
      */
     public synchronized float readTemperature() throws IOException {
-        if (lastTemperature.isValid())
+        if (lastTemperature.isValid()) {
             return lastTemperature.val / 10.0F;
+        }
 
         int UT = readRawTemp();
         int X1 = ((UT - AC6) * AC5) >> 15;
@@ -203,8 +199,9 @@ public class Bmp180 implements AutoCloseable {
      * @throws IOException if there was communication problem
      */
     public synchronized int readPressure() throws IOException {
-        if (lastPressure.isValid())
+        if (lastPressure.isValid()) {
             return lastPressure.val;
+        }
         long p;
         int UT = readRawTemp();
         int UP = readRawPressure();

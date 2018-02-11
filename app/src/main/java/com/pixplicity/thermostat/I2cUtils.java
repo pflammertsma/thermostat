@@ -1,6 +1,5 @@
 package com.pixplicity.thermostat;
 
-
 import android.util.Log;
 
 import com.google.android.things.pio.I2cDevice;
@@ -8,7 +7,6 @@ import com.google.android.things.pio.I2cDevice;
 import java.io.IOException;
 
 import static android.content.ContentValues.TAG;
-
 
 class I2cUtils {
 
@@ -54,7 +52,6 @@ class I2cUtils {
 //        int lo = readU8(device, register + 1);
 //        return (lo << 8) + hi;
 //    }
-
 
 //    public static int readS16LE(I2cDevice device, int register) throws IOException {
 //        int lo = readU8(device,  register);

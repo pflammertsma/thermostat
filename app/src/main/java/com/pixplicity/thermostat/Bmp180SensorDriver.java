@@ -11,7 +11,6 @@ import com.google.android.things.userdriver.UserSensorReading;
 import java.io.IOException;
 import java.util.UUID;
 
-
 public class Bmp180SensorDriver implements AutoCloseable {
     private static final String TAG = "Bmp180SensorDriver";
     public static final String BAROMETER_SENSOR = "com.samgol.barometer";
@@ -139,7 +138,6 @@ public class Bmp180SensorDriver implements AutoCloseable {
         }
     }
 
-
     private class PressureUserDriver extends UserSensorDriver {
         // DRIVER parameters
         // documented at https://source.android.com/devices/sensors/hal-interface.html#sensor_t
@@ -188,9 +186,7 @@ public class Bmp180SensorDriver implements AutoCloseable {
             return mEnabled;
         }
 
-
     }
-
 
     private class BarometerUserDriver extends UserSensorDriver {
         private static final float DRIVER_RESOLUTION = 0.005f;
