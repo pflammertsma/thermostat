@@ -5,6 +5,7 @@ import android.app.Activity
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
+import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -69,6 +70,7 @@ class MainActivity : Activity() {
     private var tempTarget = 20f
     private var tempCurrent = 20f
 
+    private lateinit var vgRoot: TouchInterceptorLayout
     private lateinit var tvTempCurrent: TextView
     private lateinit var tvTempTarget: TextView
     private lateinit var ivFlame: ImageView
@@ -78,6 +80,7 @@ class MainActivity : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        vgRoot = findViewById(R.id.vg_root)
         tvTempCurrent = findViewById(R.id.tv_temp_current)
         tvTempTarget = findViewById(R.id.tv_temp_target)
         ivFlame = findViewById(R.id.iv_flame)
@@ -93,8 +96,9 @@ class MainActivity : Activity() {
             tempTarget = Math.max(TEMP_MIN, Math.min(tempTarget + 0.5f, TEMP_MAX))
             updateTarget()
         }
-        vDim.setOnClickListener {
+        vgRoot.interceptTouchListener = View.OnTouchListener { v, event ->
             wakeUp()
+            false
         }
     }
 
@@ -143,8 +147,8 @@ class MainActivity : Activity() {
             val press = mBmp180!!.readPressure().toFloat()
             val alt = mBmp180!!.readAltitude().toDouble()
 //            Log.d(TAG, "loop: temp $tempCurrent alt: $alt press: $press")
-            tvTempCurrent.text = String.format("%.1f", tempCurrent)
-        } catch (e: IOException) {
+            tvTempCurrent.text = getString(R.string.state_temp, tempCurrent)
+        } catch (e: Exception) {
             Log.e(TAG, "Sensor loop  error : ", e)
             tvTempCurrent.text = "ERROR"
         }
@@ -182,7 +186,7 @@ class MainActivity : Activity() {
     }
 
     private fun updateTarget() {
-        tvTempTarget.text = String.format("%.1f", tempTarget)
+        tvTempTarget.text = getString(R.string.state_temp, tempTarget)
     }
 
 }

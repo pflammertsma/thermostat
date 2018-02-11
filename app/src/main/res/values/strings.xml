@@ -4,6 +4,8 @@
 
     <string name="state_initializing">INIT</string>
     <string name="state_error">ERROR</string>
-    <string name="state_temp">%.2f° C</string>
+    <string name="state_temp">%.1f</string>
+    <string name="state_degrees_c">°C</string>
+    <string name="state_degrees_f">°F</string>
 
 </resources>
