@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.pixplicity.thermostat.TouchInterceptorLayout
-    android:id="@+id/vg_root"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.pixplicity.thermostat.TouchInterceptorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/vg_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#a0b0ff"
@@ -13,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#000"
-        tools:visibility="invisible"/>
+        tools:visibility="invisible" />
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -47,7 +46,7 @@
                 android:text="@string/state_initializing"
                 android:textColor="#f88"
                 android:textSize="32sp"
-                android:textStyle="bold"/>
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tv_error_detail"
@@ -56,7 +55,7 @@
                 android:layout_gravity="center"
                 android:text="@string/please_wait"
                 android:textColor="#f88"
-                android:textSize="20sp"/>
+                android:textSize="20sp" />
 
         </LinearLayout>
 
@@ -86,7 +85,7 @@
                 android:textColor="#fff"
                 android:textSize="64sp"
                 android:textStyle="bold"
-                tools:text="20"/>
+                tools:text="20" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -96,7 +95,7 @@
                 android:text="@string/state_degrees_c"
                 android:textColor="#fff"
                 android:textSize="32sp"
-                android:textStyle="bold"/>
+                android:textStyle="bold" />
 
         </LinearLayout>
 
@@ -116,7 +115,7 @@
                 android:padding="16dp"
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_decrease"
-                android:tint="#000"/>
+                android:tint="#000" />
 
             <TextView
                 android:id="@+id/tv_temp_target"
@@ -127,7 +126,7 @@
                 android:textColor="#000"
                 android:textSize="48sp"
                 android:textStyle="bold"
-                tools:text="20"/>
+                tools:text="20" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -139,7 +138,7 @@
                 android:text="@string/state_degrees_c"
                 android:textColor="#000"
                 android:textSize="24sp"
-                android:textStyle="bold"/>
+                android:textStyle="bold" />
 
             <ImageButton
                 android:id="@+id/bt_increase"
@@ -149,7 +148,7 @@
                 android:padding="16dp"
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_increase"
-                android:tint="#000"/>
+                android:tint="#000" />
 
         </LinearLayout>
 
@@ -165,7 +164,7 @@
         android:padding="4dp"
         android:scaleType="fitCenter"
         android:src="@drawable/ic_power"
-        android:tint="#000"/>
+        android:tint="#000" />
 
     <ImageView
         android:id="@+id/iv_flame"
@@ -178,6 +177,6 @@
         android:tint="#80000000"
         android:visibility="gone"
         tools:ignore="ContentDescription"
-        tools:visibility="visible"/>
+        tools:visibility="visible" />
 
 </com.pixplicity.thermostat.TouchInterceptorLayout>
