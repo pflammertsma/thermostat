@@ -16,9 +16,10 @@ class I2cUtils {
         int result = 0;
         try {
             result = device.readRegByte(reg);
-            if (DEBUG)
+            if (DEBUG) {
                 Log.d(TAG, "readU8: (0x" + Integer.toHexString(result) +
                         ") from reg (0x" + Integer.toHexString(reg) + ")");
+            }
         } catch (Exception e) {
             Log.e(TAG, "readU8: ", e);
         }
@@ -29,8 +30,9 @@ class I2cUtils {
         int result = readU8(device, reg);
         result = result > 127 ? result - 256 : result;
 
-        if (DEBUG)
+        if (DEBUG) {
             Log.d(TAG, "returned  signed val" + result);
+        }
 
         return result;
     }
@@ -38,13 +40,13 @@ class I2cUtils {
     static int readU16BE(I2cDevice device, int register) throws IOException {
         int hi = readU8(device, register);
         int lo = readU8(device, register + 1);
-        return (hi << 8) + lo;
+        return ((hi & 0xFF) << 8) + (lo & 0xFF);
     }
 
     static int readS16BE(I2cDevice device, int register) throws IOException {
         int hi = readS8(device, register);
         int lo = readU8(device, register + 1);
-        return ((hi << 8) + lo);
+        return (hi << 8) + (lo & 0xFF);
     }
 
 //    public static int readU16LE(I2cDevice device, int register) throws IOException {
@@ -58,4 +60,5 @@ class I2cUtils {
 //        int hi = readS8(device, register + 1);
 //        return ((hi << 8) + lo);
 //    }
+
 }
