@@ -14,7 +14,6 @@ import com.google.android.things.pio.Gpio
 import com.google.android.things.pio.PeripheralManagerService
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.IOException
-import java.util.*
 
 class MainActivity : Activity() {
     companion object {
@@ -23,6 +22,8 @@ class MainActivity : Activity() {
         private const val SENSOR_READ_PER_SECOND = 10
         private const val SENSOR_READ_DELAY = 1000L / SENSOR_READ_PER_SECOND
         private const val AVERAGE_OVER_SECONDS = 3
+        private const val FADE_INVERT_DELAY = 4000L
+        private const val FADE_DIM_DELAY = 10000L
     }
 
     private val TAG = MainActivity::class.java.simpleName
@@ -57,11 +58,11 @@ class MainActivity : Activity() {
             handler.postDelayed(this, SENSOR_READ_DELAY)
         }
     }
-    private val fader1 = Runnable {
-        setBrightness(0f)
-    }
-    private val fader2 = Runnable {
+    private val fadeInversion = Runnable {
         v_dim.animate().alpha(1f).start()
+    }
+    private val fadeDimScreen = Runnable {
+        setBrightness(0f)
     }
 
     private var mBmp180: Bmp180? = null
@@ -114,10 +115,10 @@ class MainActivity : Activity() {
     private fun wakeUp() {
         setBrightness(1f)
         v_dim.animate().alpha(0f).start()
-        handler.removeCallbacks(fader1)
-        handler.removeCallbacks(fader2)
-        handler.postDelayed(fader1, 5000)
-        handler.postDelayed(fader2, 10000)
+        handler.removeCallbacks(fadeInversion)
+        handler.removeCallbacks(fadeDimScreen)
+        handler.postDelayed(fadeInversion, FADE_INVERT_DELAY)
+        handler.postDelayed(fadeDimScreen, FADE_DIM_DELAY)
     }
 
     private fun setBrightness(brightness: Float) {
