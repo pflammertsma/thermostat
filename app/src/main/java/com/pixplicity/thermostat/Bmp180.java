@@ -15,6 +15,8 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 public class Bmp180 implements AutoCloseable {
     private static final String TAG = Bmp180.class.getSimpleName();
 
+    private static final boolean FLOATING_POINT = false;
+
     public final static int BMP180_ADDRESS = 0x77;
 
     @Retention(SOURCE)
@@ -67,6 +69,7 @@ public class Bmp180 implements AutoCloseable {
     private int AC6 = 0;
     private int B1 = 0;
     private int B2 = 0;
+    private int MB = 0;
     private int MC = 0;
     private int MD = 0;
 
@@ -125,6 +128,7 @@ public class Bmp180 implements AutoCloseable {
         AC6 = readU16(BMP180_CAL_AC6);
         B1 = readS16(BMP180_CAL_B1);
         B2 = readS16(BMP180_CAL_B2);
+        MB = readS16(BMP180_CAL_MC);
         MC = readS16(BMP180_CAL_MC);
         MD = readS16(BMP180_CAL_MD);
     }
@@ -136,7 +140,6 @@ public class Bmp180 implements AutoCloseable {
      * @throws IOException if there was communication problem
      */
     private int readRawTemp() throws IOException {
-
         if (lastRawTemp.isValid()) {
             return lastRawTemp.val;
         }
@@ -156,7 +159,6 @@ public class Bmp180 implements AutoCloseable {
      * @throws IOException if there was communication problem
      */
     private int readRawPressure() throws IOException {
-
         if (lastRawPressure.isValid()) {
             return lastRawPressure.val;
         }
@@ -184,12 +186,26 @@ public class Bmp180 implements AutoCloseable {
         }
 
         int UT = readRawTemp();
-        int X1 = ((UT - AC6) * AC5) >> 15;
-        int X2 = (MC << 11) / (X1 + MD);
-        int B5 = X1 + X2;
-        lastTemperature.setVal(((B5 + 8) >> 4));
+        int temp = computeTemperature(UT);
+        lastTemperature.setVal(temp);
 
         return lastTemperature.val / 10.0F;
+    }
+
+    private int computeTemperature(int UT) {
+        int temp;
+        if (FLOATING_POINT) {
+            float X1 = ((UT - AC6) * AC5 / 32768);
+            float X2 = (MC * 2048) / (X1 + MD);
+            float B5 = X1 + X2;
+            temp = Math.round((B5 + 8) / 16f);
+        } else {
+            int X1 = ((UT - AC6) * AC5) >> 15;
+            int X2 = (MC << 11) / (X1 + MD);
+            int B5 = X1 + X2;
+            temp = ((B5 + 8) >> 4);
+        }
+        return temp;
     }
 
     /**
@@ -202,6 +218,7 @@ public class Bmp180 implements AutoCloseable {
         if (lastPressure.isValid()) {
             return lastPressure.val;
         }
+
         long p;
         int UT = readRawTemp();
         int UP = readRawPressure();
