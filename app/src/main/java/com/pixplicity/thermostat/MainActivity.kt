@@ -1,6 +1,7 @@
 package com.pixplicity.thermostat
 
 import android.app.Activity
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
@@ -8,12 +9,17 @@ import android.view.Display
 import android.view.View
 import android.widget.ImageButton
 import android.widget.PopupMenu
+import com.github.mikephil.charting.data.*
+import com.github.mikephil.charting.interfaces.datasets.IBarDataSet
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import com.google.android.things.device.DeviceManager
 import com.google.android.things.device.ScreenManager
 import com.google.android.things.pio.Gpio
 import com.google.android.things.pio.PeripheralManagerService
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.IOException
+import java.util.*
+import kotlin.collections.ArrayList
 
 class MainActivity : Activity() {
     companion object {
@@ -75,6 +81,9 @@ class MainActivity : Activity() {
     private var tempCurrent = 20f
     private var tempRecent = Rolling(SENSOR_READ_PER_SECOND * AVERAGE_OVER_SECONDS)
 
+    private val tempVals = LinkedList<BarEntry>()
+    private val tempDataSet = BarDataSet(tempVals, "Temperature")
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -110,6 +119,15 @@ class MainActivity : Activity() {
             }
             menu.show()
         }
+
+        // Initialize graph
+        val dataSets = ArrayList<IBarDataSet>()
+        dataSets.add(tempDataSet)
+        tempDataSet.color = Color.RED
+        chart.data = BarData(dataSets)
+        chart.data.barWidth = 0.9f
+        chart.setFitBars(true)
+        chart.description.isEnabled = false
     }
 
     private fun wakeUp() {
@@ -155,11 +173,7 @@ class MainActivity : Activity() {
         mBmp180?.let {
             try {
                 tempCurrent = it.readTemperature()
-                tempRecent.add(tempCurrent.toDouble())
-                val average = tempRecent.average
-                tv_temp_current.text = getString(R.string.state_temp, average)
-                vg_temp_current.visibility = View.VISIBLE
-                vg_error.visibility = View.GONE
+                onTemperatureChange(tempCurrent)
             } catch (e: Exception) {
                 Log.e(TAG, "Sensor loop error", e)
                 tv_error.text = getString(R.string.state_error)
@@ -168,6 +182,29 @@ class MainActivity : Activity() {
                 vg_error.visibility = View.VISIBLE
             }
         }
+    }
+
+    var tempX = 0f
+
+    private fun onTemperatureChange(temp: Float) {
+        if (true) {
+            if (tempDataSet.entryCount > 20) {
+                tempDataSet.removeFirst()
+            }
+            val entry = BarEntry(tempX++, temp)
+            tempVals.add(entry)
+            Log.d(TAG, "entry $entry")
+            //tempDataSet.addEntry(entry)
+            tempDataSet.notifyDataSetChanged()
+            chart.notifyDataSetChanged()
+            chart.invalidate()
+        }
+
+        tempRecent.add(temp.toDouble())
+        val average = tempRecent.average
+        tv_temp_current.text = getString(R.string.state_temp, average)
+        vg_temp_current.visibility = View.VISIBLE
+        vg_error.visibility = View.GONE
     }
 
     private fun closeSensor() {
