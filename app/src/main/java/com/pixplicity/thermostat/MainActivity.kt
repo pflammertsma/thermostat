@@ -1,20 +1,19 @@
 package com.pixplicity.thermostat
 
-import android.animation.Animator
 import android.app.Activity
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
-import android.view.MotionEvent
+import android.view.Display
 import android.view.View
 import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.TextView
+import android.widget.PopupMenu
+import com.google.android.things.device.DeviceManager
+import com.google.android.things.device.ScreenManager
 import com.google.android.things.pio.Gpio
 import com.google.android.things.pio.PeripheralManagerService
+import kotlinx.android.synthetic.main.activity_main.*
 import java.io.IOException
-
-private val TAG = MainActivity::class.java.simpleName
 
 class MainActivity : Activity() {
     companion object {
@@ -45,11 +44,11 @@ class MainActivity : Activity() {
             if (furnaceOn) {
                 ledRed?.value = !(ledRed?.value ?: false)
                 ledGreen?.value = false
-                ivFlame.visibility = View.VISIBLE
+                iv_flame.visibility = View.VISIBLE
             } else {
                 ledRed?.value = false
                 ledGreen?.value = true
-                ivFlame.visibility = View.GONE
+                iv_flame.visibility = View.GONE
             }
             handler.postDelayed(this, 100)
         }
@@ -58,7 +57,7 @@ class MainActivity : Activity() {
         setBrightness(0f)
     }
     private val fader2 = Runnable {
-        vDim.animate().alpha(1f).start()
+        v_dim.animate().alpha(1f).start()
     }
 
     private var mBmp180: Bmp180? = null
@@ -70,21 +69,12 @@ class MainActivity : Activity() {
     private var tempTarget = 20f
     private var tempCurrent = 20f
 
-    private lateinit var vgRoot: TouchInterceptorLayout
-    private lateinit var tvTempCurrent: TextView
-    private lateinit var tvTempTarget: TextView
-    private lateinit var ivFlame: ImageView
-    private lateinit var vDim: View
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
 
-        vgRoot = findViewById(R.id.vg_root)
-        tvTempCurrent = findViewById(R.id.tv_temp_current)
-        tvTempTarget = findViewById(R.id.tv_temp_target)
-        ivFlame = findViewById(R.id.iv_flame)
-        vDim = findViewById(R.id.v_dim)
+        ScreenManager(Display.DEFAULT_DISPLAY).setDisplayDensity(180)
+
+        setContentView(R.layout.activity_main)
 
         findViewById<ImageButton>(R.id.bt_decrease).setOnClickListener {
             wakeUp()
@@ -96,15 +86,29 @@ class MainActivity : Activity() {
             tempTarget = Math.max(TEMP_MIN, Math.min(tempTarget + 0.5f, TEMP_MAX))
             updateTarget()
         }
-        vgRoot.interceptTouchListener = View.OnTouchListener { v, event ->
+        vg_root.interceptTouchListener = View.OnTouchListener { v, event ->
             wakeUp()
             false
+        }
+        bt_restart.setOnClickListener {
+            val menu = PopupMenu(this, bt_restart)
+            menu.inflate(R.menu.power)
+            menu.setOnMenuItemClickListener { listener ->
+                when (listener.itemId) {
+                    R.id.action_reset -> System.exit(0)
+                    R.id.action_reboot -> {
+                        DeviceManager().reboot()
+                    }
+                }
+                true
+            }
+            menu.show()
         }
     }
 
     private fun wakeUp() {
         setBrightness(1f)
-        vDim.animate().alpha(0f).start()
+        v_dim.animate().alpha(0f).start()
         handler.removeCallbacks(fader1)
         handler.removeCallbacks(fader2)
         handler.postDelayed(fader1, 5000)
@@ -147,10 +151,15 @@ class MainActivity : Activity() {
             val press = mBmp180!!.readPressure().toFloat()
             val alt = mBmp180!!.readAltitude().toDouble()
 //            Log.d(TAG, "loop: temp $tempCurrent alt: $alt press: $press")
-            tvTempCurrent.text = getString(R.string.state_temp, tempCurrent)
+            tv_temp_current.text = getString(R.string.state_temp, tempCurrent)
+            vg_temp_current.visibility = View.VISIBLE
+            vg_error.visibility = View.GONE
         } catch (e: Exception) {
-            Log.e(TAG, "Sensor loop  error : ", e)
-            tvTempCurrent.text = "ERROR"
+            Log.e(TAG, "Sensor loop error", e)
+            tv_error.text = getString(R.string.state_error)
+            tv_error_detail.text = e.message
+            vg_temp_current.visibility = View.GONE
+            vg_error.visibility = View.VISIBLE
         }
     }
 
@@ -186,7 +195,7 @@ class MainActivity : Activity() {
     }
 
     private fun updateTarget() {
-        tvTempTarget.text = getString(R.string.state_temp, tempTarget)
+        tv_temp_target.text = getString(R.string.state_temp, tempTarget)
     }
 
 }

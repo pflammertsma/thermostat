@@ -2,10 +2,12 @@
 
     <string name="app_name">Thermostat</string>
 
-    <string name="state_initializing">INIT</string>
+    <string name="state_initializing">INITIALIZING</string>
     <string name="state_error">ERROR</string>
     <string name="state_temp">%.1f</string>
     <string name="state_degrees_c">°C</string>
     <string name="state_degrees_f">°F</string>
+
+    <string name="please_wait">Please wait…</string>
 
 </resources>
