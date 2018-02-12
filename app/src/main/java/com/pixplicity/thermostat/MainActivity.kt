@@ -14,11 +14,15 @@ import com.google.android.things.pio.Gpio
 import com.google.android.things.pio.PeripheralManagerService
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.IOException
+import java.util.*
 
 class MainActivity : Activity() {
     companion object {
         private const val TEMP_MIN = 10f
         private const val TEMP_MAX = 28f
+        private const val SENSOR_READ_PER_SECOND = 10
+        private const val SENSOR_READ_DELAY = 1000L / SENSOR_READ_PER_SECOND
+        private const val AVERAGE_OVER_SECONDS = 3
     }
 
     private val TAG = MainActivity::class.java.simpleName
@@ -50,7 +54,7 @@ class MainActivity : Activity() {
                 ledGreen?.value = true
                 iv_flame.visibility = View.GONE
             }
-            handler.postDelayed(this, 100)
+            handler.postDelayed(this, SENSOR_READ_DELAY)
         }
     }
     private val fader1 = Runnable {
@@ -68,6 +72,7 @@ class MainActivity : Activity() {
 
     private var tempTarget = 20f
     private var tempCurrent = 20f
+    private var tempRecent = Rolling(SENSOR_READ_PER_SECOND * AVERAGE_OVER_SECONDS)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -146,26 +151,27 @@ class MainActivity : Activity() {
     }
 
     private fun readData() {
-        try {
-            tempCurrent = mBmp180!!.readTemperature()
-            val press = mBmp180!!.readPressure().toFloat()
-            val alt = mBmp180!!.readAltitude().toDouble()
-//            Log.d(TAG, "loop: temp $tempCurrent alt: $alt press: $press")
-            tv_temp_current.text = getString(R.string.state_temp, tempCurrent)
-            vg_temp_current.visibility = View.VISIBLE
-            vg_error.visibility = View.GONE
-        } catch (e: Exception) {
-            Log.e(TAG, "Sensor loop error", e)
-            tv_error.text = getString(R.string.state_error)
-            tv_error_detail.text = e.message
-            vg_temp_current.visibility = View.GONE
-            vg_error.visibility = View.VISIBLE
+        mBmp180?.let {
+            try {
+                tempCurrent = it.readTemperature()
+                tempRecent.add(tempCurrent.toDouble())
+                val average = tempRecent.average
+                tv_temp_current.text = getString(R.string.state_temp, average)
+                vg_temp_current.visibility = View.VISIBLE
+                vg_error.visibility = View.GONE
+            } catch (e: Exception) {
+                Log.e(TAG, "Sensor loop error", e)
+                tv_error.text = getString(R.string.state_error)
+                tv_error_detail.text = e.message
+                vg_temp_current.visibility = View.GONE
+                vg_error.visibility = View.VISIBLE
+            }
         }
     }
 
     private fun closeSensor() {
         try {
-            mBmp180!!.close()
+            mBmp180?.close()
         } catch (e: IOException) {
             Log.e(TAG, "closeSensor  error: ", e)
         }
